@@ -18,16 +18,41 @@ sprk.connect(function() {
     */
 });
 
-function parse_command(data){
-    return "ok";
+function parseData(data){
+    try {
+        var jsondata = JSON.parse(data);
+        console.log(jsondata);
+        return jsondata;
+    }catch(e){
+        console.log("json parse error.")
+        return null;
+    }
 }
 
 function receive(sprk, data){
-    var command = parse_command(data);
-    if(command){
-        var direction = Math.floor(Math.random() * 360);
-        sprk.roll(1000, 10);
-        console.log('command received:' + command)
+    var positionData = parseData(data);
+    if(positionData){
+        var nowPosition = positionData.nowPosition;
+        var targetPosition = positionData.targetPosition;
+
+        var diff_x = targetPosition.x - nowPosition.x;
+        var diff_y = targetPosition.y - nowPosition.y;
+
+        var distance = Math.sqrt(diff_y*diff_y + diff_x*diff_x);
+        var direction = Math.atan2(diff_y, diff_x) * (180 / Math.PI);
+        if(direction < 0){
+            direction += 360;
+        }
+
+        var threshold = 50; 
+        var speed = 10;
+
+        if(distance > threshold){
+            sprk.roll(speed, direction);
+            console.log('direction ' + direction);
+            console.log('distance ' + distance);
+        }
+        console.log('positionData received:' + positionData)
     }
 }
 
@@ -37,11 +62,8 @@ function close(sprk){
     });
 }
 
-// サーバーインスタンスを生成し、リッスンします
-// net.createServer()に渡す関数は、'connection'イベントハンドラーになります。
-// コールバック関数が受け取るsockeオブジェクトは各接続ごとにユニークなものとなります。
+// カメラからspheroの位置情報を受診するサーバー
 net.createServer(function(sock) {
-    // TCPサーバーが接続しました。socketオブジェクトが自動的に割り当てられます。
     console.log('CONNECTED: ' + sock.remoteAddress +':'+ sock.remotePort);
     sock.on('data', function(data){
         receive(sprk, data);
@@ -49,7 +71,6 @@ net.createServer(function(sock) {
     sock.on('close', function(had_err){
         close(sprk);
     });
-    // 'error'イベントハンドラー
     sock.on('error', function(err) {
         console.log('ERROR: ' + err.stack);
     });
