@@ -1,10 +1,12 @@
+require('dotenv').config();
+
 var net = require('net');
-var HOST = '127.0.0.1';
-var PORT = 3000;
+var host = process.env.HOST;
+var port = process.env.DATA_PORT;
 
 //init sphero
 var sphero = require("sphero"),
-    sprk = sphero("92edbec1855745bb85bb389a9fe54907"); // change BLE address accordingly
+    sprk = sphero(process.env.SPHERO_PORT); // change BLE address accordingly
 
 sprk.connect(function() {
     console.log("Connecting to sphero is suceeded.")
@@ -74,5 +76,5 @@ net.createServer(function(sock) {
     sock.on('error', function(err) {
         console.log('ERROR: ' + err.stack);
     });
-}).listen(PORT, HOST);
-console.log('Server listening on ' + HOST +':'+ PORT);
+}).listen(port, host);
+console.log('Server listening on ' + host +':'+ port);
