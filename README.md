@@ -24,6 +24,10 @@ Controll Sphero using [Sphero.js](https://github.com/orbotix/sphero.js)
 
 ## 外部カメラからのspheroの制御
 
+### Demo
+
+![result](https://github.com/reverentF/sphero/blob/media/sample.gif)
+
 ### Usage
 1. `node server.js`
 
